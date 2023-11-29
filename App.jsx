@@ -7,7 +7,7 @@ import {nanoid} from "nanoid"
 import {detect} from "detect-browser"
 
 export default function App() {
-	
+		
 	const [userData, setUserData] = React.useState({
 		userId: nanoid(),
 		downloadRequested: false,
@@ -59,6 +59,27 @@ export default function App() {
 		   you complete these tasks successfully, you should see a correctly rendered message in the console, and the button should become faded and unclickable after you click it. 
 */
 
+	// NOTE: maybe not maintain if not working
+	const fetchUserLocationData = async() => {
+		const response = await fetch("https://ipapi.co/json/")
+		const data = await response.json()
+
+		return {ip: data.ip, city: data.city, country: data.country_name}
+		
+	}
+	
+	const handleSharing = async(event) =>{
+		const locationData = await fetchUserLocationData()
+		setUserData(prevData=>({
+		 userId: prevData.userId,
+		 downloadRequested: true,
+		 downloadTimeStamp : new Date().toLocaleString(),
+		 requestedFileId: event.target.dataset.fileId,
+		 browser: detect(),
+		 location: locationData
+		}))
+	}
+
 	return (
 		<div>
 			<Header />
@@ -69,6 +90,8 @@ export default function App() {
 					<button 
 						className="download-button" 
 						data-file-id={nanoid()}
+						onClick={handleSharing}
+						disabled={userData.downloadRequested}
 					>
 						Download
 					</button>
